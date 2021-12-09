@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wmapp.fil.mapper.FilInvestConfigMapper">
+    
+    <resultMap type="FilInvestConfig" id="FilInvestConfigResult">
+        <result property="id"    column="id"    />
+        <result property="configName"    column="config_name"    />
+        <result property="investMin"    column="invest_min"    />
+        <result property="investMax"    column="invest_max"    />
+        <result property="cashRate"    column="cash_rate"    />
+        <result property="investRate"    column="invest_rate"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectFilInvestConfigVo">
+        select id, config_name, invest_min, invest_max, cash_rate, invest_rate, status, create_time, update_time from fil_invest_config
+    </sql>
+
+    <select id="selectFilInvestConfigList" parameterType="FilInvestConfig" resultMap="FilInvestConfigResult">
+        <include refid="selectFilInvestConfigVo"/>
+        <where>  
+            <if test="configName != null  and configName != ''"> and config_name like concat('%', #{configName}, '%')</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectFilInvestConfigById" parameterType="Long" resultMap="FilInvestConfigResult">
+        <include refid="selectFilInvestConfigVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertFilInvestConfig" parameterType="FilInvestConfig" useGeneratedKeys="true" keyProperty="id">
+        insert into fil_invest_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="configName != null">config_name,</if>
+            <if test="investMin != null">invest_min,</if>
+            <if test="investMax != null">invest_max,</if>
+            <if test="cashRate != null">cash_rate,</if>
+            <if test="investRate != null">invest_rate,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="configName != null">#{configName},</if>
+            <if test="investMin != null">#{investMin},</if>
+            <if test="investMax != null">#{investMax},</if>
+            <if test="cashRate != null">#{cashRate},</if>
+            <if test="investRate != null">#{investRate},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFilInvestConfig" parameterType="FilInvestConfig">
+        update fil_invest_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="configName != null">config_name = #{configName},</if>
+            <if test="investMin != null">invest_min = #{investMin},</if>
+            <if test="investMax != null">invest_max = #{investMax},</if>
+            <if test="cashRate != null">cash_rate = #{cashRate},</if>
+            <if test="investRate != null">invest_rate = #{investRate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFilInvestConfigById" parameterType="Long">
+        delete from fil_invest_config where id = #{id}
+    </delete>
+
+    <delete id="deleteFilInvestConfigByIds" parameterType="String">
+        delete from fil_invest_config where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="checkInvestNum"  parameterType="FilInvestConfig">
+        SELECT
+            count( id )
+        FROM
+            fil_invest_config
+        WHERE
+              id != ${id}
+            AND ${investNum} BETWEEN invest_min AND invest_max
+    </select>
+    <select id="getConfigByUserId" resultMap="FilInvestConfigResult">
+        <include refid="selectFilInvestConfigVo"/>
+        WHERE
+                ( SELECT COUNT( DISTINCT id ) AS referrerNum FROM fil_user WHERE pid = #{userId} ) BETWEEN invest_min
+                AND invest_max
+            LIMIT 1
+    </select>
+
+</mapper>

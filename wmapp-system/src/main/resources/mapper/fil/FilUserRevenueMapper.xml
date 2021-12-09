@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wmapp.fil.mapper.FilUserRevenueMapper">
+    
+    <resultMap type="FilUserRevenue" id="FilUserRevenueResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userCode"    column="user_code"    />
+        <result property="investId"    column="invest_id"    />
+        <result property="amount"    column="amount"    />
+        <result property="type"    column="type"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectFilUserRevenueVo">
+        select id, user_id, user_code, invest_id, amount, type, create_time from fil_user_revenue
+    </sql>
+
+    <select id="selectFilUserRevenueList" parameterType="FilUserRevenue" resultMap="FilUserRevenueResult">
+        <include refid="selectFilUserRevenueVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="userCode != null  and userCode != ''"> and user_code = #{userCode}</if>
+            <if test="investId != null "> and invest_id = #{investId}</if>
+            <if test="type != null "> and type = #{type}</if>
+        </where>
+        order by create_time desc
+    </select>
+    
+    <select id="selectFilUserRevenueById" parameterType="Long" resultMap="FilUserRevenueResult">
+        <include refid="selectFilUserRevenueVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertFilUserRevenue" parameterType="FilUserRevenue" useGeneratedKeys="true" keyProperty="id">
+        insert into fil_user_revenue
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="userCode != null">user_code,</if>
+            <if test="investId != null">invest_id,</if>
+            <if test="amount != null">amount,</if>
+            <if test="type != null">type,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="userCode != null">#{userCode},</if>
+            <if test="investId != null">#{investId},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="type != null">#{type},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+    <insert id="insertBatchUserRevenue" useGeneratedKeys="true" keyProperty="id">
+        insert into fil_user_revenue(user_id, user_code,invest_id,amount,type)
+        values
+        <foreach item="item" index="index" collection="list" separator=",">
+            (#{item.userId},#{item.userCode},#{item.investId},#{item.amount},#{item.type})
+        </foreach>
+    </insert>
+</mapper>

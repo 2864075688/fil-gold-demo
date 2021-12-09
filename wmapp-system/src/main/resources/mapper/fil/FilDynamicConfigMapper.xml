@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wmapp.fil.mapper.FilDynamicConfigMapper">
+
+    <resultMap type="FilDynamicConfig" id="FilDynamicConfigResult">
+        <result property="id"    column="id"    />
+        <result property="configName"    column="config_name"    />
+        <result property="peopleNum"    column="people_num"    />
+        <result property="takeRate"    column="take_rate"    />
+        <result property="eraNum"    column="era_num"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectFilDynamicConfigVo">
+        select id, config_name, people_num, take_rate, era_num, status, create_time, update_time from fil_dynamic_config
+    </sql>
+
+    <select id="selectFilDynamicConfigList" parameterType="FilDynamicConfig" resultMap="FilDynamicConfigResult">
+        <include refid="selectFilDynamicConfigVo"/>
+        <where>
+            <if test="configName != null  and configName != ''"> and config_name like concat('%', #{configName}, '%')</if>
+            <if test="eraNum != null "> and era_num = #{eraNum}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+        order by people_num desc
+    </select>
+
+    <select id="selectFilDynamicConfigById" parameterType="Long" resultMap="FilDynamicConfigResult">
+        <include refid="selectFilDynamicConfigVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertFilDynamicConfig" parameterType="FilDynamicConfig" useGeneratedKeys="true" keyProperty="id">
+        insert into fil_dynamic_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="configName != null and configName != ''">config_name,</if>
+            <if test="peopleNum != null">people_num,</if>
+            <if test="takeRate != null">take_rate,</if>
+            <if test="eraNum != null">era_num,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="configName != null and configName != ''">#{configName},</if>
+            <if test="peopleNum != null">#{peopleNum},</if>
+            <if test="takeRate != null">#{takeRate},</if>
+            <if test="eraNum != null">#{eraNum},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateFilDynamicConfig" parameterType="FilDynamicConfig">
+        update fil_dynamic_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="configName != null and configName != ''">config_name = #{configName},</if>
+            <if test="peopleNum != null">people_num = #{peopleNum},</if>
+            <if test="takeRate != null">take_rate = #{takeRate},</if>
+            <if test="eraNum != null">era_num = #{eraNum},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFilDynamicConfigById" parameterType="Long">
+        delete from fil_dynamic_config where id = #{id}
+    </delete>
+
+    <delete id="deleteFilDynamicConfigByIds" parameterType="String">
+        delete from fil_dynamic_config where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

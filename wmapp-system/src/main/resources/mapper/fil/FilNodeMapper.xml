@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wmapp.fil.mapper.FilNodeMapper">
+    
+    <resultMap type="FilNode" id="FilNodeResult">
+        <result property="id"    column="id"    />
+        <result property="nodeName"    column="node_name"    />
+        <result property="nodeType"    column="node_type"    />
+        <result property="amount"    column="amount"    />
+        <result property="quota"    column="quota"    />
+        <result property="occupyQuota"    column="occupy_quota"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectFilNodeVo">
+        select id, node_name, node_type, amount, quota, occupy_quota, status, create_time, update_time from fil_node
+    </sql>
+
+    <select id="selectFilNodeList" parameterType="FilNode" resultMap="FilNodeResult">
+        <include refid="selectFilNodeVo"/>
+        <where>
+            <if test="nodeName != null  and nodeName != ''"> and node_name like concat('%', #{nodeName}, '%')</if>
+            <if test="nodeType != null "> and node_type = #{nodeType}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectFilNodeById" parameterType="Long" resultMap="FilNodeResult">
+        <include refid="selectFilNodeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertFilNode" parameterType="FilNode" useGeneratedKeys="true" keyProperty="id">
+        insert into fil_node
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="nodeName != null and nodeName != ''">node_name,</if>
+            <if test="nodeType != null">node_type,</if>
+            <if test="amount != null">amount,</if>
+            <if test="quota != null">quota,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="nodeName != null and nodeName != ''">#{nodeName},</if>
+            <if test="nodeType != null">#{nodeType},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="quota != null">#{quota},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFilNode" parameterType="FilNode">
+        update fil_node
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="nodeName != null and nodeName != ''">node_name = #{nodeName},</if>
+            <if test="nodeType != null">node_type = #{nodeType},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="quota != null">quota = #{quota},</if>
+            <if test="occupyQuota != null">occupy_quota = #{occupyQuota},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFilNodeById" parameterType="Long">
+        delete from fil_node where id = #{id}
+    </delete>
+
+    <delete id="deleteFilNodeByIds" parameterType="String">
+        delete from fil_node where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="selectFilNodeByIdToUpdate" parameterType="Long" resultMap="FilNodeResult">
+        <include refid="selectFilNodeVo"/>
+        where id = #{id}
+        for update
+    </select>
+</mapper>

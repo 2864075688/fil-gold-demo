@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wmapp.fil.mapper.FilUserMapper">
+    
+    <resultMap type="FilUser" id="FilUserResult">
+        <result property="id"    column="id"    />
+        <result property="pid"    column="pid"    />
+        <result property="rootIds"    column="root_ids"    />
+        <result property="userCode"    column="user_code"    />
+        <result property="parentCode"    column="parent_code"    />
+        <result property="nodeId"    column="node_id"    />
+        <result property="totalInvest"    column="total_invest"    />
+        <result property="repeatInvest"    column="repeat_invest"    />
+        <result property="pastMoney"    column="past_money"    />
+        <result property="nodeRevenue"    column="node_revenue"    />
+        <result property="staticRevenue"    column="static_revenue"    />
+        <result property="dynamicRevenue"    column="dynamic_revenue"    />
+        <result property="nodeType"    column="node_type"    />
+        <result property="status"    column="status"    />
+        <result property="authStatus"    column="auth_status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectFilUserVo">
+        select id, pid, root_ids, user_code, parent_code,node_id, total_invest,repeat_invest,
+               past_money, node_revenue, static_revenue, dynamic_revenue, node_type, status,auth_status, create_time,
+               update_time
+        from fil_user
+    </sql>
+
+    <select id="getTotalInvest" parameterType="java.util.List" resultType="java.math.BigDecimal">
+        SELECT
+            SUM( u.total_invest ) AS totalInvest
+        FROM
+            fil_user u
+        WHERE u.id
+        IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getHigherLevelUserListForUpdate"  resultType="com.wmapp.fil.domain.FilUser">
+        SELECT
+            u.id as id,
+            u.user_code as userCode,
+            u.parent_code as parentCode,
+            u.total_invest as totalInvest,
+            u.static_revenue as staticRevenue,
+            u.dynamic_revenue as dynamicRevenue,
+            ul.`level` as `level`
+        FROM
+            fil_user u
+        JOIN fil_user_level ul ON u.id = ul.super_id
+        WHERE
+            ul.user_id = #{userId}
+            AND ul.`level` &lt;= #{levels}
+        for update
+    </select>
+
+    <select id="getLowerLevelUserListForUpdate" resultType="com.wmapp.fil.domain.FilUser">
+        SELECT
+            u.id as id,
+            u.user_code as userCode,
+            u.parent_code as parentCode,
+            u.total_invest as totalInvest,
+            u.static_revenue as staticRevenue,
+            u.dynamic_revenue as dynamicRevenue,
+            ul.`level` as `level`
+        FROM
+            fil_user u
+        JOIN fil_user_level ul ON u.id = ul.user_id
+        WHERE
+            ul.super_id = #{userId}
+        AND ul.`level` &lt;= #{levels}
+        for update
+    </select>
+
+    <select id="getSameLevelListForUpdate" parameterType="Long" resultType="com.wmapp.fil.domain.FilUser">
+        SELECT
+            u.id as id,
+            u.user_code as userCode,
+            u.parent_code as parentCode,
+            u.total_invest as totalInvest,
+            u.static_revenue as staticRevenue,
+            u.dynamic_revenue as dynamicRevenue
+        FROM
+            fil_user u
+        WHERE
+            u.id != #{userId}
+            and u.pid = #{pid}
+            for update
+    </select>
+
+    <select id="getReferrerNumByIds" parameterType="java.util.List" resultType="com.wmapp.fil.vo.ReferrerNumVo">
+        SELECT
+            pid as userId,
+            COUNT( DISTINCT id ) AS referrerNum
+        FROM
+            fil_user
+        WHERE
+            pid in
+            <foreach item="id" collection="list" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        GROUP BY
+            pid
+    </select>
+
+    <select id="selectFilUserList" parameterType="FilUser" resultMap="FilUserResult">
+        <include refid="selectFilUserVo"/>
+        <where>
+            <if test="userCode != null  and userCode != ''"> and user_code = #{userCode}</if>
+            <if test="nodeType != null"> and node_type = #{nodeType}</if>
+            <if test="status != null"> and status = #{status}</if>
+            <if test="createTime != null "> and create_time = #{createTime}</if>
+        </where>
+    </select>
+    <select id="selectFilUserById" parameterType="Long" resultMap="FilUserResult">
+        <include refid="selectFilUserVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="getFileUserToNode" resultMap="FilUserResult">
+       select
+              id,
+              user_code,
+              node_type,
+              node_revenue
+        from
+             fil_user
+       where
+            node_type in (1,2)
+      for update
+    </select>
+        
+    <insert id="insertFilUser" parameterType="FilUser" useGeneratedKeys="true" keyProperty="id">
+        insert into fil_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pid != null">pid,</if>
+            <if test="rootIds != null">root_ids,</if>
+            <if test="userCode != null">user_code,</if>
+            <if test="parentCode != null">parent_code,</if>
+            <if test="nodeId != null">node_id,</if>
+            <if test="totalInvest != null">total_invest,</if>
+            <if test="pastMoney != null">past_money,</if>
+            <if test="nodeRevenue != null">node_revenue,</if>
+            <if test="staticRevenue != null">static_revenue,</if>
+            <if test="dynamicRevenue != null">dynamic_revenue,</if>
+            <if test="nodeType != null">node_type,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="pid != null">#{pid},</if>
+            <if test="rootIds != null">#{rootIds},</if>
+            <if test="userCode != null">#{userCode},</if>
+            <if test="parentCode != null">#{parentCode},</if>
+            <if test="nodeId != null">#{nodeId},</if>
+            <if test="totalInvest != null">#{totalInvest},</if>
+            <if test="pastMoney != null">#{pastMoney},</if>
+            <if test="nodeRevenue != null">#{nodeRevenue},</if>
+            <if test="staticRevenue != null">#{staticRevenue},</if>
+            <if test="dynamicRevenue != null">#{dynamicRevenue},</if>
+            <if test="nodeType != null">#{nodeType},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFilUser" parameterType="FilUser">
+        update fil_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pid != null">pid = #{pid},</if>
+            <if test="userCode != null">user_code = #{userCode},</if>
+            <if test="nodeId != null">node_id = #{nodeId},</if>
+            <if test="totalInvest != null">total_invest = #{totalInvest},</if>
+            <if test="repeatInvest != null">repeat_invest = #{repeatInvest},</if>
+            <if test="pastMoney != null">past_money = #{pastMoney},</if>
+            <if test="nodeRevenue != null">node_revenue = #{nodeRevenue},</if>
+            <if test="staticRevenue != null">static_revenue = #{staticRevenue},</if>
+            <if test="dynamicRevenue != null">dynamic_revenue = #{dynamicRevenue},</if>
+            <if test="nodeType != null">node_type = #{nodeType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authStatus != null">auth_status = #{authStatus},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateBatchFilUserRevenue"  parameterType="java.util.List">
+        update fil_user
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="node_revenue =case" suffix="end,">
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.nodeRevenue!=null">
+                        when id=#{i.id} then #{i.nodeRevenue}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="static_revenue =case" suffix="end," >
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.staticRevenue!=null">
+                        when id=#{i.id} then #{i.staticRevenue}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="dynamic_revenue =case" suffix="end," >
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.dynamicRevenue!=null">
+                        when id=#{i.id} then #{i.dynamicRevenue}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where id in
+        <foreach collection="list" separator="," open="(" close=")" item="i" index="index" >
+            #{i.id}
+        </foreach>
+    </update>
+
+    <select id="selectFilUserByCode" resultMap="FilUserResult">
+        <include refid="selectFilUserVo"/>
+        where user_code = #{userCode}
+    </select>
+
+    <select id="selectFilUserByCodeForUpdate" resultMap="FilUserResult">
+        select id, pid,node_type,user_code, total_invest,repeat_invest,past_money, node_revenue, static_revenue, dynamic_revenue,status
+        from fil_user
+        where user_code = #{userCode}
+        for update
+    </select>
+    <select id="getUserTotalAmount" resultType="com.wmapp.fil.domain.FilUser">
+        SELECT
+            sum( total_invest ) AS totalInvest,
+            sum( past_money ) AS pastMoney
+        FROM
+            fil_user
+    </select>
+
+</mapper>

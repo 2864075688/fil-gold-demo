@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wmapp.fil.mapper.FilTransactionRecordMapper">
+    
+    <resultMap type="FilTransactionRecord" id="FilTransactionRecordResult">
+        <result property="id"    column="id"    />
+        <result property="objIds"    column="obj_ids"    />
+        <result property="userCode"    column="user_code"    />
+        <result property="payerFrom"    column="payer_from"    />
+        <result property="payerTo"    column="payer_to"    />
+        <result property="transactionHash"    column="transaction_hash"    />
+        <result property="amount"    column="amount"    />
+        <result property="amountType"    column="amount_type"    />
+        <result property="recordType"    column="record_type"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectFilTransactionRecordVo">
+        select id, obj_ids, user_code, payer_from, payer_to, transaction_hash, amount, amount_type, record_type, status, create_time, update_time from fil_transaction_record
+    </sql>
+
+    <select id="selectFilTransactionRecordList" parameterType="FilTransactionRecord" resultMap="FilTransactionRecordResult">
+        <include refid="selectFilTransactionRecordVo"/>
+        <where>  
+            <if test="userCode != null  and userCode != ''"> and user_code = #{userCode}</if>
+            <if test="payerFrom != null  and payerFrom != ''"> and payer_from = #{payerFrom}</if>
+            <if test="payerTo != null  and payerTo != ''"> and payer_to = #{payerTo}</if>
+            <if test="transactionHash != null  and transactionHash != ''"> and transaction_hash = #{transactionHash}</if>
+            <if test="amountType != null "> and amount_type = #{amountType}</if>
+            <if test="recordType != null "> and record_type = #{recordType}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectFilTransactionRecordListCustom" resultMap="FilTransactionRecordResult">
+        <include refid="selectFilTransactionRecordVo"/>
+        <where>
+             and status !=2
+        </where>
+        order by create_time desc
+    </select>
+    
+    <select id="selectFilTransactionRecordById" parameterType="Long" resultMap="FilTransactionRecordResult">
+        <include refid="selectFilTransactionRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="getExistHashCount" parameterType="String" resultType="Integer">
+        select count(id)
+        from fil_transaction_record
+        where transaction_hash = #{transactionHash}
+    </select>
+        
+    <insert id="insertFilTransactionRecord" parameterType="FilTransactionRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into fil_transaction_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="objIds != null">obj_ids,</if>
+            <if test="userCode != null">user_code,</if>
+            <if test="payerFrom != null">payer_from,</if>
+            <if test="payerTo != null">payer_to,</if>
+            <if test="transactionHash != null">transaction_hash,</if>
+            <if test="amount != null">amount,</if>
+            <if test="amountType != null">amount_type,</if>
+            <if test="recordType != null">record_type,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="objIds != null">#{objIds},</if>
+            <if test="userCode != null">#{userCode},</if>
+            <if test="payerFrom != null">#{payerFrom},</if>
+            <if test="payerTo != null">#{payerTo},</if>
+            <if test="transactionHash != null">#{transactionHash},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="amountType != null">#{amountType},</if>
+            <if test="recordType != null">#{recordType},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFilTransactionRecord" parameterType="FilTransactionRecord">
+        update fil_transaction_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="objIds != null">obj_ids = #{objIds},</if>
+            <if test="userCode != null">user_code = #{userCode},</if>
+            <if test="payerFrom != null">payer_from = #{payerFrom},</if>
+            <if test="payerTo != null">payer_to = #{payerTo},</if>
+            <if test="transactionHash != null">transaction_hash = #{transactionHash},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="amountType != null">amount_type = #{amountType},</if>
+            <if test="recordType != null">record_type = #{recordType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFilTransactionRecordById" parameterType="Long">
+        delete from fil_transaction_record where id = #{id}
+    </delete>
+
+    <delete id="deleteFilTransactionRecordByIds" parameterType="String">
+        delete from fil_transaction_record where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

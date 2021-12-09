@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wmapp.fil.mapper.FilInvestLogMapper">
+    
+    <resultMap type="FilInvestLog" id="FilInvestLogResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userCode"    column="user_code"    />
+        <result property="investAmount"    column="invest_amount"    />
+        <result property="chargeAmout"    column="charge_amout"    />
+        <result property="transactionHash"    column="transaction_hash"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectFilInvestLogVo">
+        select id, user_id, user_code, invest_amount, charge_amout,transaction_hash, create_time from fil_invest_log
+    </sql>
+
+    <select id="selectFilInvestLogList" parameterType="FilInvestLog" resultMap="FilInvestLogResult">
+        <include refid="selectFilInvestLogVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="userCode != null  and userCode != ''"> and user_code = #{userCode}</if>
+            <if test="investAmount != null "> and invest_amount = #{investAmount}</if>
+            <if test="chargeAmout != null "> and charge_amout = #{chargeAmout}</if>
+            <if test="transactionHash != null  and transactionHash != ''"> and transaction_hash = #{transactionHash}</if>
+        </where>
+    </select>
+    
+    <select id="selectFilInvestLogById" parameterType="Long" resultMap="FilInvestLogResult">
+        <include refid="selectFilInvestLogVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertFilInvestLog" parameterType="FilInvestLog" useGeneratedKeys="true" keyProperty="id">
+        insert into fil_invest_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="userCode != null">user_code,</if>
+            <if test="investAmount != null">invest_amount,</if>
+            <if test="chargeAmout != null">charge_amout,</if>
+            <if test="transactionHash != null">transaction_hash,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="userCode != null">#{userCode},</if>
+            <if test="investAmount != null">#{investAmount},</if>
+            <if test="chargeAmout != null">#{chargeAmout},</if>
+            <if test="transactionHash != null">#{transactionHash},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+</mapper>
