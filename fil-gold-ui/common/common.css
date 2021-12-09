@@ -1,0 +1,7 @@
+/* 文本显示一行，多余省略号 */
+.one-line-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /*禁止换行显示*/
+  white-space: nowrap;
+}
